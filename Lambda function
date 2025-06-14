@@ -1,0 +1,21 @@
+import json
+import boto3
+import base64
+import time
+
+s3 = boto3.client('s3')
+bucket = 'bucket_name'
+
+def lambda_handler(event, context):
+    for record in event['Records']:
+        # Decode Kinesis data
+        payload = base64.b64decode(record["kinesis"]["data"]).decode("utf-8")
+
+        # Timestamp for unique file name
+        timestamp = int(time.time() * 1000)
+        filename = f"processed/log_{timestamp}.json"
+
+        # Store payload into S3
+        s3.put_object(Bucket=bucket, Key=filename, Body=payload)
+
+    return {"statusCode": 200, "body": "Success"}
