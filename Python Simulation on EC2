@@ -1,0 +1,27 @@
+import boto3
+import json
+import time
+import random
+
+kinesis = boto3.client('kinesis', region_name='us-east-1')
+
+def generate_log():
+    return {
+        "timestamp": time.time(),
+        "user_id": random.randint(1000, 9999),
+        "action": random.choice(["click", "view", "scroll", "purchase"]),
+        "page": random.choice(["home", "product", "about", "contact"]),
+        "device": random.choice(["mobile", "desktop", "tablet"])
+    }
+
+while True:
+    log_data = generate_log()
+    print("Sending log:", log_data)
+    
+    kinesis.put_record(
+        StreamName="visitor-log-stream",
+        Data=json.dumps(log_data).encode('utf-8'),
+        PartitionKey="user"
+    )
+    
+    time.sleep(2)
